@@ -1,0 +1,67 @@
+version: '3.7'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    container_name: es01
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.4.0
+    ports:
+      - 5601:5601
+    networks:
+      - esnet
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.4.0
+    environment:
+      - setup.kibana.host=kibana:5601
+      - output.elasticsearch.hosts=["elasticsearch:9200"]
+      - KIBANA_HOST=kibana:5601
+    networks:
+      - esnet
+
+  db:
+    build: ./db
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 3306:3306
+    networks:
+      - esnet
+    env_file:
+      - ./development.env
+    volumes:
+      - my-db:/var/lib/mysql
+      - ./db/filebeat.yml:/etc/filebeat/filebeat.yml
+
+  web:
+    build:
+      context: ./web
+    ports:
+      - 8080:80
+    volumes:
+      - ./web/src:/var/www/html/
+      - ./web/filebeat.yml:/etc/filebeat/filebeat.yml
+    networks:
+      - esnet
+    depends_on:
+      - db
+    env_file:
+      - ./development.env
+
+volumes:
+  esdata01:
+    driver: local
+  my-db:
+    driver: local
+networks:
+  esnet:
