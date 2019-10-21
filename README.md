@@ -1,9 +1,16 @@
 # Monitoring Apache and MySQL with ELK
 
-- Start with docker-compose up
+- Start with:
+    ```bash
+    docker-compose up
+    ```
 - Enter to db container:
-    - enter to mysql as root with: mysql -u root -p
-    - execute:
+    - Enter to mysql as root with: 
+        ```bash
+        mysql -u root -p
+        ```
+    - Execute:
+        ```mysql
         CREATE DATABASE testdb;
         USE testdb;
         CREATE TABLE IF NOT EXISTS tasks (
@@ -13,9 +20,14 @@
         )  ENGINE=INNODB;
         GRANT ALL PRIVILEGES ON testdb.* TO 'sys_admin'@'%';
         SET GLOBAL slow_query_log = 'on';
-    - return to bash and execute:         
-        - filebeat setup
-        - service filebeat start
+        ```
+    - Return to bash and execute:
+        ```bash
+        filebeat setup
+        service filebeat start
+        ```
 - Enter to web container and execute:
-    - filebeat setup
-    - service filebeat start
+    ```bash
+    filebeat setup
+    service filebeat start
+    ```
